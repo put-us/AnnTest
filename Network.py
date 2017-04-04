@@ -55,7 +55,7 @@ class network:
 		for idx in range(len(self.weights)):
 			zs=self.weights[idx].dot(input)+self.biases[idx]
 			z.append(zs)
-			activation.append(sigmoid(z))
+			activation.append(self.sigmoid(z))
 			input=activation[idx]
 		delta_L=(output-activation[-1])*self.sp(z[-1])
 		del_C_ws[-1]=activation[-2]*delta_L
@@ -71,3 +71,12 @@ class network:
 			del_C_bs[idx]=delta_L
 		
 		return (del_C_ws,del_C_bs)
+	
+	def Test(self,input):
+		output=-1
+		for idx in range(len(self.weights)):
+			output=self.sigmoid(self.weights[idx].dot(input)+self.biases[idx])
+			#z.append(zs)
+			#activation.append(sigmoid(z))
+			input=output
+		return np.argmax(output)
