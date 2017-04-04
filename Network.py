@@ -53,16 +53,21 @@ class network:
 		del_C_ws=[np.zeros(shape=weight.shape)for weight in self.weights]
 		del_C_bs=[np.zeros(shape=bias.shape)for bias in self.biases]
 		for idx in range(len(self.weights)):
-			z=self.weights[idx].dot(input)+self.biases[idx]
-			z.append(z)
+			zs=self.weights[idx].dot(input)+self.biases[idx]
+			z.append(zs)
 			activation.append(sigmoid(z))
 			input=activation[idx]
 		delta_L=(output-activation[-1])*self.sp(z[-1])
-		del_C_ws[i]=acti*delta_L
-		del_C_bs[i]=delta_L
-		for i in range(-len(del_C_ws),0):
-
-			delta_L=self.weights[idx].dot(delta_L)
-
-		
+		del_C_ws[-1]=activation[-2]*delta_L
+		del_C_bs[-1]=delta_L
+		for i in range(-len(del_C_ws)+1,0):
 			
+			delta_L=self.weights[idx+1].dot(delta_L)*self.sp(z[idx])
+			if idx==0:
+				del_C_ws[idx]=input*delta_L
+			else 
+				del_C_ws[idx]=activation[idx-1]*delta_L
+		
+			del_C_bs[idx]=delta_L
+		
+		return (del_C_ws,del_C_bs)
