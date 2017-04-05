@@ -8,7 +8,7 @@ logger_name=""
 learning_rate=.1
 batch_size=100
 epoch=100
-#print(len(image[0]))
+#print("label",labels[0])
 ann=an.network(dimentions,logger_name,learning_rate,batch_size,epoch)
 
 ann.train(image,labels)

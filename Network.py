@@ -29,11 +29,13 @@ class network:
                 return self.sigmoid(z)*(1-self.sigmoid(z))
 		
 	def train(self,x,y):
-                print(len(x))
-                batch_len=int(len(x)/self.batch_size)
-                for i in range(self.epoch):
-                        for j in range(batch_len):
-                                self.SGD(x[j*batch_len:(j+1)*batch_len-1],y[j*batch_len:(j+1)*batch_len-1])
+				#print(len(x))
+				batch_len=int(len(x)/self.batch_size)
+				for i in range(self.epoch):
+					for j in range(batch_len):
+						self.SGD(x[j*batch_len:(j+1)*batch_len-1],y[j*batch_len:(j+1)*batch_len-1])
+				print("Weights: ",self.weights)
+				print("Biases : ",self.biases)
 				
 	
 	def SGD(self,batch_in,batch_out):
@@ -44,7 +46,7 @@ class network:
 		for input1,output in zip(batch_in,batch_out):
 			del_C_ws,del_C_bs=self.backProp(input1,output)
 			for i in range(len(avg_del_C_ws)):
-                                print("AVg del C" ,i)
+                                #print("AVg del C" ,i)
                                 avg_del_C_ws[i]+=del_C_ws[i]
                                 avg_del_C_bs[i]+=del_C_bs[i]
 		
@@ -53,35 +55,36 @@ class network:
 			self.biases[i]=self.biases[i]-self.learning_rate/self.batch_size*avg_del_C_bs[i]
 		return True
 		
-	def backProp(self,input1,output):
+	def backProp(self,image,output_label):
 		weighted_sum=[]
 		activation=[]
 		zlist=[]
+		input1=np.reshape(image,(784,1))
 		del_C_ws=[np.zeros(shape=weight.shape)for weight in self.weights]
 		del_C_bs=[np.zeros(shape=bias.shape)for bias in self.biases]
 		for idx in range(len(self.weights)):
-                        if idx==0:
-                                z=np.dot(self.weights[idx],input1)+self.biases[idx].transpose()
-                        else:
-                                z=np.dot(self.weights[idx],input1)+self.biases[idx]
+                        z=np.dot(self.weights[idx],input1)+self.biases[idx]
                         #print(idx, z.shape,z)
-                        zlist.append(z.transpose())
-                        activation.append(self.sigmoid(z.transpose()))
+                        zlist.append(z)
+                        activation.append(self.sigmoid(z))
                         #print(idx, activation[idx].shape,activation[idx])
                         input1=activation[idx]
 		#print("Output", zlist[-1])
+		output_list=[ 1 if x==int(output_label) else 0 for x in range(10)]
+		output=np.reshape(output_list,(10,1))
+		#print(output)
 		delta_L=(output-activation[-1])*self.sp(zlist[-1])
-		del_C_ws[-1]=np.dot(activation[-2],delta_L)
+		del_C_ws[-1]=delta_L.dot(activation[-2].transpose())
 		del_C_bs[-1]=delta_L
 		for idx in range(-1,-len(del_C_ws)):
 			print("idx2",idx)
-			delta_L=self.weights[idx].dot(delta_L)*self.sp(zlist[idx-1])
+			delta_L=np.dot(self.weights[idx].transpose(),delta_L)*self.sp(zlist[idx-1])
 			if idx==-len(del_C_ws)+1:
-                                del_C_ws[idx]=(input1*delta_L).transpose()
-                                print(del_C_ws[idx])
+                                del_C_ws[idx]=delta_L.dot(input1.transpose())#(input1*delta_L).transpose()
+                                #print(del_C_ws[idx])
 			else :
-                                del_C_ws[idx]=(activation[idx-2]*delta_L).transpose()
-                                print(del_C_ws[idx])
+                                del_C_ws[idx]=delta_L.dot(activation[idx-2].transpose())
+                                #print(del_C_ws[idx])
 		
 			del_C_bs[idx]=delta_L
 		#print(del_C_ws,del_C_bs)
