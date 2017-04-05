@@ -14,8 +14,8 @@ class network:
 		self.epoch=epoch
 		for idx in range(len(dimentions)-1):
                         #print(idx)
-                        self.weights.append(np.zeros(shape=(dimentions[idx+1],dimentions[idx])))
-                        self.biases.append(np.zeros(shape=(dimentions[idx+1],1)))
+                        self.weights.append(np.random.randn(dimentions[idx+1],dimentions[idx]))
+                        self.biases.append(np.random.randn(dimentions[idx+1],1))
 		#print(self.weights)
 		#print(self.biases)
 	
@@ -47,7 +47,9 @@ class network:
 			del_C_ws,del_C_bs=self.backProp(input1,output)
 			for i in range(len(avg_del_C_ws)):
                                 #print("AVg del C" ,i)
+                                #print("del_C_ws[i]",del_C_ws[i])
                                 avg_del_C_ws[i]+=del_C_ws[i]
+
                                 avg_del_C_bs[i]+=del_C_bs[i]
 		
 		for i in range(len(avg_del_C_ws)):
@@ -60,6 +62,7 @@ class network:
 		activation=[]
 		zlist=[]
 		input1=np.reshape(image,(784,1))
+		image1=np.reshape(image,(784,1))
 		del_C_ws=[np.zeros(shape=weight.shape)for weight in self.weights]
 		del_C_bs=[np.zeros(shape=bias.shape)for bias in self.biases]
 		for idx in range(len(self.weights)):
@@ -76,17 +79,18 @@ class network:
 		delta_L=(output-activation[-1])*self.sp(zlist[-1])
 		del_C_ws[-1]=delta_L.dot(activation[-2].transpose())
 		del_C_bs[-1]=delta_L
-		for idx in range(-1,-len(del_C_ws)):
-			print("idx2",idx)
+		for idx in range(-1,-len(del_C_ws),-1):
+			#print("idx2",idx)
 			delta_L=np.dot(self.weights[idx].transpose(),delta_L)*self.sp(zlist[idx-1])
+			print("delta_L",delta_L)
 			if idx==-len(del_C_ws)+1:
-                                del_C_ws[idx]=delta_L.dot(input1.transpose())#(input1*delta_L).transpose()
-                                #print(del_C_ws[idx])
+				del_C_ws[idx-1]=delta_L.dot(image1.transpose())#(input1*delta_L).transpose()
+				print("del_C_ws[idx-1]",del_C_ws[idx-1])
 			else :
-                                del_C_ws[idx]=delta_L.dot(activation[idx-2].transpose())
-                                #print(del_C_ws[idx])
+				del_C_ws[idx-1]=delta_L.dot(activation[idx-2].transpose())
+				print(" NOt True idx==-len(del_C_ws)+1")
 		
-			del_C_bs[idx]=delta_L
+			del_C_bs[idx-1]=delta_L
 		#print(del_C_ws,del_C_bs)
 		
 		return (del_C_ws,del_C_bs)
